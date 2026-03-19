@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'face_photo_path'
     ];
 
     /**
@@ -45,5 +46,23 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Relación: Un usuario tiene muchos roles
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    // Relación: Un usuario (gestor) tiene muchos juegos creados
+    public function createdGames()
+    {
+        return $this->hasMany(Game::class, 'creator_id');
+    }
+
+    // Una función para comprobar si tiene un rol específico
+    public function hasRole(string $roleName): bool
+    {
+        return $this->roles()->where('name', $roleName)->exists();
     }
 }
