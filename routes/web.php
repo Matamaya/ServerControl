@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\CatalogController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -41,9 +42,8 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
 
 // Rutas solo para JUGADORES
 Route::middleware(['auth', 'role:jugador'])->group(function () {
-    Route::get('/mis-juegos', function () {
-        return '¡Hola Jugador! Aquí verás la lista de juegos publicados.';
-    });
+    Route::get('/catalogo', [CatalogController::class, 'index'])->name('catalog.index');
+    Route::get('/jugar/{game}', [CatalogController::class, 'play'])->name('catalog.play');
 });
 
 require __DIR__ . '/auth.php';
