@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\GameController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -31,11 +32,10 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
     });
 });
 
-// Rutas solo para GESTORES (y podríamos añadir admins luego)
+// Rutas del CRUD de Juegos exclusivas para el GESTOR
 Route::middleware(['auth', 'role:gestor'])->group(function () {
-    Route::get('/panel-juegos', function () {
-        return '¡Hola Gestor! Aquí irá tu CRUD de juegos de React/Inertia.';
-    });
+    // Esto crea automáticamente las rutas /games, /games/create, etc.
+    Route::resource('games', GameController::class);
 });
 
 
