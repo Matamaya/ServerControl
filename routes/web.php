@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -28,9 +29,8 @@ Route::middleware('auth')->group(function () {
 
 // Rutas exclusivas para el ADMINISTRADOR
 Route::middleware(['auth', 'role:administrador'])->group(function () {
-    Route::get('/panel-usuarios', function () {
-        return 'Aquí el admin podrá crear, borrar y asignar roles a los usuarios.';
-    });
+    // Panel principal de gestión de usuarios
+    Route::resource('users', UserController::class);
 });
 
 // Rutas del CRUD de Juegos exclusivas para el GESTOR
@@ -38,7 +38,6 @@ Route::middleware(['auth', 'role:gestor'])->group(function () {
     // Esto crea automáticamente las rutas /games, /games/create, etc.
     Route::resource('games', GameController::class);
 });
-
 
 // Rutas solo para JUGADORES
 Route::middleware(['auth', 'role:jugador'])->group(function () {
