@@ -1,7 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
 export default function Index({ auth, games }) {
+    const deleteGame = (id) => {
+        if (confirm('¿Estás seguro de que quieres eliminar este juego? Esta acción no se puede deshacer.')) {
+            router.delete(route('games.destroy', id));
+        }
+    };
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -49,6 +54,7 @@ export default function Index({ auth, games }) {
                                             </td>
                                             <td className="px-6 py-4 flex gap-2">
                                                 <Link href={route('games.edit', game.id)} className="text-blue-600 hover:underline">Editar</Link>
+                                                <button onClick={() => deleteGame(game.id)} className="text-red-600 hover:underline">Eliminar</button>
                                             </td>
                                         </tr>
                                     ))

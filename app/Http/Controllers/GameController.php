@@ -94,8 +94,17 @@ class GameController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Game $game)
     {
-        //
+        // Seguridad: Comprobamos que el juego pertenece a este gestor
+        if ($game->creator_id !== Auth::id()) {
+            abort(403, 'No tienes permiso para eliminar este juego.');
+        }
+
+        // Eliminamos el juego de la base de datos
+        $game->delete();
+
+        // Redirigimos al panel con un mensaje
+        return redirect()->route('games.index')->with('message', 'Juego eliminado correctamente.');
     }
 }
