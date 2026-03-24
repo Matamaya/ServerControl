@@ -24,4 +24,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+// Rutas solo para GESTORES (y podríamos añadir admins luego)
+Route::middleware(['auth', 'role:gestor'])->group(function () {
+    Route::get('/panel-juegos', function () {
+        return '¡Hola Gestor! Aquí irá tu CRUD de juegos de React/Inertia.';
+    });
+});
+
+
+// Rutas solo para JUGADORES
+Route::middleware(['auth', 'role:jugador'])->group(function () {
+    Route::get('/mis-juegos', function () {
+        return '¡Hola Jugador! Aquí verás la lista de juegos publicados.';
+    });
+});
+
+require __DIR__ . '/auth.php';
