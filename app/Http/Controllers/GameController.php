@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Game;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreGameRequest;
 
 class GameController extends Controller
 {
@@ -28,15 +29,25 @@ class GameController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Games/Create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreGameRequest $request)
     {
-        //
+        // 1. Obtenemos los datos ya validados y limpios
+        $validatedData = $request->validated();
+
+        // 2. Le añadimos el ID del gestor que lo está creando
+        $validatedData['creator_id'] = Auth::id();
+
+        // 3. Guardamos en la base de datos
+        Game::create($validatedData);
+
+        // 4. Redirigimos al panel de juegos con un mensaje de éxito
+        return redirect()->route('games.index')->with('message', 'Juego creado correctamente.');
     }
 
     /**

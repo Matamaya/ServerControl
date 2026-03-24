@@ -15,9 +15,9 @@ export default function Index({ auth, games }) {
 
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-bold text-gray-900">Tus juegos registrados</h3>
-                            <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">
+                            <Link href={route('games.create')} className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">
                                 + Crear Nuevo Juego
-                            </button>
+                            </Link>
                         </div>
 
                         {/* Tabla de juegos */}
