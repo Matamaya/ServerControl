@@ -24,6 +24,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Rutas exclusivas para el ADMINISTRADOR
+Route::middleware(['auth', 'role:administrador'])->group(function () {
+    Route::get('/panel-usuarios', function () {
+        return 'Aquí el admin podrá crear, borrar y asignar roles a los usuarios.';
+    });
+});
+
 // Rutas solo para GESTORES (y podríamos añadir admins luego)
 Route::middleware(['auth', 'role:gestor'])->group(function () {
     Route::get('/panel-juegos', function () {
