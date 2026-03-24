@@ -48,7 +48,7 @@ export default function Index({ auth, games }) {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 flex gap-2">
-                                                <button className="text-blue-600 hover:underline">Editar</button>
+                                                <Link href={route('games.edit', game.id)} className="text-blue-600 hover:underline">Editar</Link>
                                             </td>
                                         </tr>
                                     ))

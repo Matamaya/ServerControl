@@ -7,6 +7,7 @@ use App\Models\Game;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreGameRequest;
+use App\Http\Requests\UpdateGameRequest;
 
 class GameController extends Controller
 {
@@ -61,17 +62,33 @@ class GameController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Game $game)
     {
-        //
+        // Seguridad: Comprobamos que el juego pertenece a este gestor
+        if ($game->creator_id !== Auth::id()) {
+            abort(403, 'No tienes permiso para editar este juego.');
+        }
+
+        return Inertia::render('Games/Edit', [
+            'game' => $game
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateGameRequest $request, Game $game)
     {
-        //
+        // Seguridad: Comprobamos de nuevo
+        if ($game->creator_id !== Auth::id()) {
+            abort(403, 'No tienes permiso para editar este juego.');
+        }
+
+        // Actualizamos el juego con los datos validados
+        $game->update($request->validated());
+
+        // Redirigimos al panel con un mensaje
+        return redirect()->route('games.index')->with('message', 'Juego actualizado correctamente.');
     }
 
     /**
