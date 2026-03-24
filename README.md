@@ -1,59 +1,81 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🎮 Plataforma de Juegos y CRM (Backend & API)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este proyecto es el núcleo (entorno servidor) de una plataforma de juegos modular. Desde la perspectiva del usuario final, funciona como un portal para acceder y jugar; sin embargo, técnicamente está diseñado como un **CRM robusto** que gestiona usuarios, roles, catálogo de juegos y expone servicios web para aplicaciones cliente independientes
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tecnologías Utilizadas
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+El proyecto se apoya en un stack moderno, priorizando la separación de responsabilidades y la seguridad:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Laravel 11 (Framework PHP):** Es el corazón de la aplicación. Gestiona el enrutamiento, la autenticación, la conexión a la base de datos y la exposición de la API RESTful.
+- **PostgreSQL:** Base de datos relacional elegida por su robustez para gestionar datos que evolucionan (usuarios, roles, sesiones, eventos de juegos).
+- **Laravel Breeze + React + Inertia.js:** Se utiliza para la capa de vistas del CRM. Inertia permite usar React para construir una interfaz dinámica (SPA) sin perder el enrutamiento y la seguridad gestionada por Laravel.
+- **Tailwind CSS:** Para un diseño rápido, responsivo y profesional en los paneles de gestión.
+- **Laravel Sanctum:** Para la autenticación y protección de los servicios web (API), asegurando que solo los juegos con una sesión válida puedan enviar datos al servidor.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Arquitectura del Proyecto
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+El proyecto está diseñado bajo una arquitectura modular y escalable, preparada para integraciones futuras:
 
-## Laravel Sponsors
+1.  **Monorepo Backend:** El repositorio contiene tanto el código fuente de Laravel como el espacio preparado para el futuro microservicio de Python (Docker).
+2.  **Separación Web vs. API:** Se ha respetado estrictamente la separación de responsabilidades:
+    - `routes/web.php`: Renderiza las vistas del CRM (React/Inertia) para la gestión visual y navegación humana.
+    - `routes/api.php`: Expone endpoints sin estado (JSON) destinados a ser consumidos exclusivamente por los juegos cliente (desarrollados en Three.js).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Roles de la Aplicación
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- Un **Jugador** pueda acceder al catalogo de juegos publicados y jugar a ellos. No tiene acceso a la gestión interna del sistema.
+- Un **Gestor** pueda crear, ver, publicar, despublicar, modificar y eliminar juegos. No gestiona usuarios ni roles.
+- Un **Administrador** pueda gestionar usuarios, asignar roles y mantener la configuración general del sistema (no participa en los juegos como jugador).
 
-## Contributing
+## Implementación de la Práctica
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 1. Base de Datos y ORM
 
-## Code of Conduct
+Se ha configurado la conexión a PostgreSQL mediante el archivo `.env`. La estructura de datos se ha levantado utilizando **Migraciones** de Laravel para tener control de versiones sobre la base de datos. Las relaciones entre tablas se gestionan mediante el ORM **Eloquent**:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Relación Muchos a Muchos entre `Users` y `Roles` (tabla pivote `role_user`).
+- Relación Uno a Muchos entre `Users` (creadores/gestores) y `Games`.
 
-## Security Vulnerabilities
+### 2. Autenticación, Roles y Seguridad
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+El sistema cuenta con autenticación real sin simulaciones. Se han definido tres roles clave: **Administrador, Gestor y Jugador**.
+La autorización se aplica estrictamente en el servidor a través de un **Middleware personalizado (`CheckRole`)**, garantizando que:
 
-## License
+- Un jugador no pueda acceder al panel de gestión, incluso si conoce la URL.
+- Un gestor solo pueda ver y modificar los juegos que le pertenecen.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 3. Panel de Gestión de Juegos (CRM)
+
+Los usuarios con rol de _Gestor_ tienen acceso a un CRUD completo desarrollado en React.
+
+- **Validación de datos:** Se utilizan `Form Requests` (`StoreGameRequest` y `UpdateGameRequest`) para validar la entrada de datos en el servidor antes de interactuar con la base de datos.
+- **Gestión de estado:** Permite publicar o despublicar juegos dinámicamente, decidiendo qué contenido es visible para los jugadores.
+
+### 4. Experiencia del Jugador
+
+El usuario _Jugador_ accede a un catálogo filtrado (`is_published = true`). Al seleccionar un juego, este se carga incrustado (`iframe`) dentro del contexto de la plataforma manteniendo el menú de navegación superior.
+
+Esto prepara el terreno para que el juego cliente (Three.js/JavaScript) funcione de manera independiente, alojado en servidores externos (ej. Vercel), comunicándose con Laravel única y exclusivamente a través de los endpoints de `api.php`.
+
+---
+
+## Instalación y Despliegue Local
+
+1.  Clonar el repositorio.
+2.  Instalar dependencias de PHP: `composer install`
+3.  Instalar dependencias de Node: `npm install`
+4.  Configurar el archivo `.env` con las credenciales de PostgreSQL.
+5.  Generar la clave de la aplicación: `php artisan key:generate`
+6.  Ejecutar las migraciones y los seeders (para crear los roles y usuarios de prueba):
+    ```bash
+    php artisan migrate:fresh --seed
+    ```
+7.  Levantar los servidores de desarrollo:
+    - Servidor PHP: `php artisan serve`
+    - Compilación de Vite: `npm run dev`
