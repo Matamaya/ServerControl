@@ -7,6 +7,41 @@ use Inertia\Inertia;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
+
+
+// 1. Ruta GET: Sirve para MOSTRAR la página con el formulario y la cámara
+Route::get('/test-facial', function () {
+    return view('test-facial'); // Asegúrate de que tu archivo se llama test-facial.blade.php
+});
+
+// 2. Ruta POST: Sirve para PROCESAR las fotos cuando el usuario le da a "Enviar"
+Route::post('/test-facial', function (Request $request) {
+    // 1. Verificación básica
+    if (!$request->hasFile('foto_registro') || !$request->hasFile('foto_webcam')) {
+        return back()->withErrors(['Faltan imágenes o superan el límite de PHP.']);
+    }
+
+    $url = env('FACIAL_SERVICE_URL', 'http://10.72.103.250:8181/verify');
+
+    try {
+        // 2. Comunicación con el microservicio Docker
+        $response = Http::timeout(60)
+            ->attach('img1', file_get_contents($request->file('foto_registro')), 'reg.jpg')
+            ->attach('img2', file_get_contents($request->file('foto_webcam')), 'web.jpg')
+            ->post($url);
+
+        // 3. Devolución de resultados a la vista
+        // Decodificamos la respuesta de la IA a un array de PHP
+        $respuestaIA = json_decode($response->body(), true);
+
+        // Se lo pasamos a la vista
+        return view('test-facial', ['respuesta' => $respuestaIA]);
+    } catch (\Exception $e) {
+        return back()->withErrors(['Error de conexión con Docker: ' . $e->getMessage()]);
+    }
+});
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
