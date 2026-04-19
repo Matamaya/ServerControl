@@ -65,4 +65,10 @@ class User extends Authenticatable
     {
         return $this->roles()->where('name', $roleName)->exists();
     }
+
+    // Relación: Un usuario tiene muchos mensajes
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
 }

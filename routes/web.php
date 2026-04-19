@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FaceEnrollmentController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -10,13 +11,18 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 
+// Rutas para el registro facial de soporte
+Route::middleware('auth')->group(function () {
+    Route::get('/profile/face-enrollment', [FaceEnrollmentController::class, 'index'])->name('face.enrollment');
+    Route::post('/profile/face-enrollment', [FaceEnrollmentController::class, 'store'])->name('face.enrollment.store');
+});
 
-// 1. Ruta GET: Sirve para MOSTRAR la página con el formulario y la cámara
+// Ruta GET: Sirve para MOSTRAR la página con el formulario y la cámara
 Route::get('/test-facial', function () {
     return view('test-facial'); // Asegúrate de que tu archivo se llama test-facial.blade.php
 });
 
-// 2. Ruta POST: Sirve para PROCESAR las fotos cuando el usuario le da a "Enviar"
+// Ruta POST: Sirve para PROCESAR las fotos cuando el usuario le da a "Enviar"
 Route::post('/test-facial', function (Request $request) {
     // 1. Verificación básica
     if (!$request->hasFile('foto_registro') || !$request->hasFile('foto_webcam')) {

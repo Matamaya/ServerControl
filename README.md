@@ -79,3 +79,23 @@ Esto prepara el terreno para que el juego cliente (Three.js/JavaScript) funcione
 7.  Levantar los servidores de desarrollo:
     - Servidor PHP: `php artisan serve`
     - Compilación de Vite: `npm run dev`
+
+
+# Configuración del Sistema de Comunicación en Tiempo Real
+
+Para implementar el chat y las notificaciones en tiempo real, se ha utilizado **Laravel Reverb** como servidor de WebSockets nativo. A continuación, se detallan los comandos ejecutados para su configuración:
+
+### 1. Instalación de la Infraestructura
+- `php artisan install:broadcasting`: Comando maestro que instala Laravel Reverb, configura el archivo `channels.php` y descarga las dependencias necesarias de Echo para el frontend.
+- `composer require pusher/pusher-php-server`: Instalación del SDK de PHP necesario para que Laravel pueda comunicarse con el servidor Reverb (utilizando el protocolo compatible con Pusher).
+
+### 2. Preparación de la Base de Datos
+- `php artisan queue:table`: Crea la migración para la tabla de "jobs". Es necesaria porque el envío de eventos se realiza en segundo plano (Queues) para no ralentizar la respuesta al usuario.
+- `php artisan migrate`: Ejecuta las migraciones pendientes (mensajes, colas de trabajo y sesiones) para asegurar la persistencia de los datos.
+
+### 3. Generación de Lógica de Negocio
+- `php artisan make:model Message -mc`: Genera el modelo `Message` junto con su migración y su controlador, permitiendo gestionar el historial del chat.
+- `php artisan make:event MessageSend`: Crea la clase de evento que se encarga de "difundir" (broadcast) los mensajes a través de los WebSockets hacia los clientes conectados.
+
+### 4. Mantenimiento y Caché
+- `php artisan config:clear`: Limpia la caché de configuración para asegurar que Laravel lea las nuevas variables del archivo `.env` (como las claves de Reverb) correctamente.
