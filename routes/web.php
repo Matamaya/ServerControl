@@ -13,11 +13,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\MessageController;
 
 
-// Ruta para mostrar el chat
-Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
-// Ruta para enviar mensajes
-Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
-
 // Rutas para el registro facial de soporte
 Route::middleware('auth')->group(function () {
     Route::get('/profile/face-enrollment', [FaceEnrollmentController::class, 'index'])->name('face.enrollment');
@@ -70,6 +65,10 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // Rutas del chat
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

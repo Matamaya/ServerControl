@@ -4,12 +4,16 @@ Este proyecto es el núcleo (entorno servidor) de una plataforma de juegos modul
 
 Está diseñado con una arquitectura monolítica modular, separando responsabilidades entre vistas (Inertia/React) y servicios web (API).
 
-## Arquitectura del Sistema
-1. **Laravel CRM (`web.php`):** Gestión de usuarios, roles, juegos y monitorización.
-2. **Laravel API (`api.php`):** Servicios web RESTful consumidos por juegos cliente.
-3. **Microservicio Python:** Contenedor Docker independiente para el reconocimiento facial biológico.
-4. **Juegos Cliente:** Archivos estáticos externos que consumen la API.
-5. **Laravel Reverb:** Servidor de WebSockets para el chat en tiempo real.
+## Arquitectura del Sistema (Monorepo)
+
+El proyecto está diseñado bajo una arquitectura monolítica modular y escalable, separando estrictamente las responsabilidades:
+
+1. **Laravel CRM (`routes/web.php`):** Renderiza las vistas (Inertia/React) para la gestión humana (usuarios, roles, juegos y monitorización).
+2. **Laravel API (`routes/api.php`):** Expone endpoints RESTful sin estado (JSON) consumidos exclusivamente por los juegos cliente.
+3. **Juegos Cliente:** Archivos estáticos externos (Three.js) que se comunican con la API.
+4. **Microservicio Python:** Contenedor Docker independiente para el reconocimiento facial biológico.
+5. **Laravel Reverb:** Servidor nativo de WebSockets para el chat y notificaciones en tiempo real.
+
 
 ## Uso del MCP
 Este repositorio utiliza plantillas de Issues y PRs estructuradas para ser consumidas y analizadas mediante el MCP oficial de Laravel, garantizando la consistencia en el código base.
@@ -23,17 +27,6 @@ El proyecto se apoya en un stack moderno, priorizando la separación de responsa
 - **Laravel Breeze + React + Inertia.js:** Se utiliza para la capa de vistas del CRM. Inertia permite usar React para construir una interfaz dinámica (SPA) sin perder el enrutamiento y la seguridad gestionada por Laravel.
 - **Tailwind CSS:** Para un diseño rápido, responsivo y profesional en los paneles de gestión.
 - **Laravel Sanctum:** Para la autenticación y protección de los servicios web (API), asegurando que solo los juegos con una sesión válida puedan enviar datos al servidor.
-
----
-
-## Arquitectura del Proyecto
-
-El proyecto está diseñado bajo una arquitectura modular y escalable, preparada para integraciones futuras:
-
-1.  **Monorepo Backend:** El repositorio contiene tanto el código fuente de Laravel como el espacio preparado para el futuro microservicio de Python (Docker).
-2.  **Separación Web vs. API:** Se ha respetado estrictamente la separación de responsabilidades:
-    - `routes/web.php`: Renderiza las vistas del CRM (React/Inertia) para la gestión visual y navegación humana.
-    - `routes/api.php`: Expone endpoints sin estado (JSON) destinados a ser consumidos exclusivamente por los juegos cliente (desarrollados en Three.js).
 
 ---
 
@@ -89,6 +82,8 @@ Esto prepara el terreno para que el juego cliente (Three.js/JavaScript) funcione
 7.  Levantar los servidores de desarrollo:
     - Servidor PHP: `php artisan serve`
     - Compilación de Vite: `npm run dev`
+    - Servidor Reverb: `php artisan reverb:start`
+    - Servidor de Colas: `php artisan queue:work`
 
 
 # Configuración del Sistema de Comunicación en Tiempo Real
@@ -112,7 +107,7 @@ Para implementar el chat y las notificaciones en tiempo real, se ha utilizado **
 
 
 
-## Terminales 
+## Info sobre las Terminales 
 
 - php artisan serve - Levanta el servidor PHP en el puerto 8000. Se encarga de procesar las rutas web, la API, la autenticación y la conexión a PostgreSQL.*
 

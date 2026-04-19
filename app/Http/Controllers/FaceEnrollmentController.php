@@ -22,14 +22,18 @@ class FaceEnrollmentController extends Controller
 
         $user = Auth::user();
 
-        // Procesar la imagen Base64
+        // Procesar la imagen Base64 genérica
         $imageData = $request->input('image');
-        $image = str_replace('data:image/png;base64,', '', $imageData);
-        $image = str_replace(' ', '+', $image);
-        $imageName = 'face_reference_' . $user->id . '.png';
+        
+        $imageParts = explode(";base64,", $imageData);
+        $imageTypeAux = explode("image/", $imageParts[0]);
+        $imageType = $imageTypeAux[1] ?? 'jpg';
+        
+        $imageBase64 = base64_decode($imageParts[1]);
+        $imageName = 'face_reference_' . $user->id . '.' . $imageType;
 
         // Guardar en el disco 'public'
-        Storage::disk('public')->put('faces/' . $imageName, base64_decode($image));
+        Storage::disk('public')->put('faces/' . $imageName, $imageBase64);
 
         // Actualizar la ruta en el usuario
         $user->update([

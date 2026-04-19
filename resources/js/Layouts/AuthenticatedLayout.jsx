@@ -5,8 +5,18 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
+
+
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
+
+    // Obtenemos los roles del usuario
+    const rolesUser = user.roles ? user.roles.map((role) => role.name) : [];
+    
+    // Comprobamos los roles a los que pertenece el usuario
+    const isAdministrador = rolesUser.includes('administrador');
+    const isGestor = rolesUser.includes('gestor');
+    const isJugador = rolesUser.includes('jugador');
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -30,6 +40,28 @@ export default function AuthenticatedLayout({ header, children }) {
                                 >
                                     Dashboard
                                 </NavLink>
+
+                                <NavLink href={route('messages.index')} active={route().current('messages.*')}>
+                                    Sala de Chat
+                                </NavLink>
+
+                                {isGestor && (
+                                    <NavLink href={route('games.index')} active={route().current('games.*')}>
+                                        Gestión de Juegos
+                                    </NavLink>
+                                )}
+
+                                {isJugador && (
+                                    <NavLink href={route('catalog.index')} active={route().current('catalog.*')}>
+                                        Catálogo de Juegos
+                                    </NavLink>
+                                )}
+
+                                {isAdministrador && (
+                                    <NavLink href={route('users.index')} active={route().current('users.*')}>
+                                        Gestión de Usuarios
+                                    </NavLink>
+                                )}
                             </div>
                         </div>
 
@@ -134,6 +166,28 @@ export default function AuthenticatedLayout({ header, children }) {
                         >
                             Dashboard
                         </ResponsiveNavLink>
+
+                        <ResponsiveNavLink href={route('messages.index')} active={route().current('messages.*')}>
+                            Sala de Chat
+                        </ResponsiveNavLink>
+                        
+                        {isGestor && (
+                            <ResponsiveNavLink href={route('games.index')} active={route().current('games.*')}>
+                                Gestión de Juegos
+                            </ResponsiveNavLink>
+                        )}
+
+                        {isJugador && (
+                            <ResponsiveNavLink href={route('catalog.index')} active={route().current('catalog.*')}>
+                                Catálogo de Juegos
+                            </ResponsiveNavLink>
+                        )}
+                        
+                        {isAdministrador && (
+                            <ResponsiveNavLink href={route('users.index')} active={route().current('users.*')}>
+                                Gestión de Usuarios
+                            </ResponsiveNavLink>
+                        )}
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">
@@ -160,7 +214,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
                     </div>
                 </div>
-            </nav>
+            </nav >
 
             {header && (
                 <header className="bg-white shadow">
@@ -168,9 +222,10 @@ export default function AuthenticatedLayout({ header, children }) {
                         {header}
                     </div>
                 </header>
-            )}
+            )
+            }
 
             <main>{children}</main>
-        </div>
+        </div >
     );
 }
