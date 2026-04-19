@@ -10,6 +10,13 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
+use App\Http\Controllers\MessageController;
+
+
+// Ruta para mostrar el chat
+Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+// Ruta para enviar mensajes
+Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
 
 // Rutas para el registro facial de soporte
 Route::middleware('auth')->group(function () {

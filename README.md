@@ -99,3 +99,15 @@ Para implementar el chat y las notificaciones en tiempo real, se ha utilizado **
 
 ### 4. Mantenimiento y Caché
 - `php artisan config:clear`: Limpia la caché de configuración para asegurar que Laravel lea las nuevas variables del archivo `.env` (como las claves de Reverb) correctamente.
+
+
+
+## Terminales 
+
+- php artisan serve - Levanta el servidor PHP en el puerto 8000. Se encarga de procesar las rutas web, la API, la autenticación y la conexión a PostgreSQL.*
+
+- npm run dev - Compila los componentes .jsx de React (Inertia) y los estilos de Tailwind CSS al vuelo cada vez que hay un cambio.*
+
+- php artisan reverb:start - Mantiene una conexión abierta con los navegadores. Recibe los eventos de Laravel y los "difunde" (broadcast) instantáneamente a los usuarios conectados a la sala de chat.* --- Esta fallando al descargarse
+
+- php artisan queue:work - Procesa las tareas en segundo plano, como el envío de mensajes en tiempo real.
