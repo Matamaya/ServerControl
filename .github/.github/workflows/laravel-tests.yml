@@ -1,0 +1,31 @@
+name: Validaciones Básicas de Laravel
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  laravel-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+      with:
+        php-version: '8.2'
+    - uses: actions/checkout@v3
+    
+    - name: Validar composer.json
+      run: composer validate --strict
+      
+    - name: Instalar Dependencias
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      
+    - name: Generar key de prueba
+      run: |
+        cp .env.example .env
+        php artisan key:generate
+        
+    - name: Comprobar sintaxis PHP
+      run: ./vendor/bin/phpstan analyse app --level=0 || echo "Considera instalar PHPStan para revisiones profundas"

@@ -2,7 +2,17 @@
 
 Este proyecto es el núcleo (entorno servidor) de una plataforma de juegos modular. Desde la perspectiva del usuario final, funciona como un portal para acceder y jugar; sin embargo, técnicamente está diseñado como un **CRM robusto** que gestiona usuarios, roles, catálogo de juegos y expone servicios web para aplicaciones cliente independientes
 
----
+Está diseñado con una arquitectura monolítica modular, separando responsabilidades entre vistas (Inertia/React) y servicios web (API).
+
+## Arquitectura del Sistema
+1. **Laravel CRM (`web.php`):** Gestión de usuarios, roles, juegos y monitorización.
+2. **Laravel API (`api.php`):** Servicios web RESTful consumidos por juegos cliente.
+3. **Microservicio Python:** Contenedor Docker independiente para el reconocimiento facial biológico.
+4. **Juegos Cliente:** Archivos estáticos externos que consumen la API.
+5. **Laravel Reverb:** Servidor de WebSockets para el chat en tiempo real.
+
+## Uso del MCP
+Este repositorio utiliza plantillas de Issues y PRs estructuradas para ser consumidas y analizadas mediante el MCP oficial de Laravel, garantizando la consistencia en el código base.
 
 ## Tecnologías Utilizadas
 
