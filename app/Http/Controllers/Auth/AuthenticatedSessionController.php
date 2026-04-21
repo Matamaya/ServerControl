@@ -78,26 +78,49 @@ class AuthenticatedSessionController extends Controller
         }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(60)
+            $capturedPhoto = $request->file('foto_webcam');
+            
+            // Verificamos conectividad antes de proceder (opcional, pero ayuda al debug)
+            $response = \Illuminate\Support\Facades\Http::timeout(60) // Aumentado a 60s por si está descargando modelos
                 ->attach('img1', file_get_contents($registroPath), 'reg.jpg')
-                ->attach('img2', file_get_contents($request->file('foto_webcam')), 'web.jpg')
+                ->attach('img2', file_get_contents($capturedPhoto), 'web.jpg')
                 ->post($url);
 
-            $respuestaIA = json_decode($response->body(), true);
-
-            if (isset($respuestaIA['error'])) {
-                return back()->withErrors(['facial' => 'Error en el servicio de IA: ' . $respuestaIA['error']]);
+            if ($response->failed()) {
+                return back()->withErrors(['facial' => 'El servicio de reconocimiento facial no responde. ¿Está el microservicio (Docker) y ngrok/localhost activos?']);
             }
 
-            if (isset($respuestaIA['distance']) && $respuestaIA['distance'] < 0.35) {
+            $respuestaIA = json_decode($response->body(), true);
+            \Illuminate\Support\Facades\Log::info('Respuesta Facial AI:', ['response' => $respuestaIA]);
+
+            if (isset($respuestaIA['error'])) {
+                // El microservicio respondió pero con un error (ej. no se detectó cara)
+                return back()->withErrors(['facial' => 'Fallo en la detección: ' . $respuestaIA['error']]);
+            }
+
+            $distance = $respuestaIA['distance'] ?? 1.0;
+
+            // Umbral de Facenet: 0.40 - 0.42 es un buen equilibrio.
+            if ($distance < 0.42) {
                 Auth::login($user);
                 $request->session()->regenerate();
                 return redirect()->intended(route('dashboard', absolute: false));
             } else {
-                return back()->withErrors(['facial' => 'Identidad no confirmada. Las fotos no coinciden.']);
+                // Guardar para depuración si falla la coincidencia
+                $debugName = time() . '_u' . $user->id . '_dist_' . str_replace('.', '', (string)$distance);
+                \Illuminate\Support\Facades\Storage::disk('public')->put('debug/' . $debugName . '_webcam.jpg', file_get_contents($capturedPhoto));
+                \Illuminate\Support\Facades\Storage::disk('public')->copy($user->face_photo_path, 'debug/' . $debugName . '_reference.jpg');
+
+                return back()->withErrors([
+                    'facial' => "Tu identidad no ha podido ser confirmada (Distancia: $distance). Intenta mejorar la iluminación o la posición de tu cara."
+                ]);
             }
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            \Illuminate\Support\Facades\Log::error('Error de conexión Facial:', ['msg' => $e->getMessage()]);
+            return back()->withErrors(['facial' => 'No se pudo conectar con el servidor de IA. Verifica que el puerto 8181 esté abierto en Docker o que la URL en .env sea correcta.']);
         } catch (\Exception $e) {
-            return back()->withErrors(['facial' => 'Error de conexión con IA: ' . $e->getMessage()]);
+            \Illuminate\Support\Facades\Log::error('Error Facial Genérico:', ['msg' => $e->getMessage()]);
+            return back()->withErrors(['facial' => 'Ocurrió un error inesperado: ' . $e->getMessage()]);
         }
     }
 }

@@ -31,7 +31,7 @@ Route::post('/test-facial', function (Request $request) {
         return back()->withErrors(['Faltan imágenes o superan el límite de PHP.']);
     }
 
-    $url = env('FACIAL_SERVICE_URL', 'http://10.72.103.250:8181/verify');
+    $url = env('FACIAL_SERVICE_URL', 'http://127.0.0.1:8181/verify');
 
     try {
         // 2. Comunicación con el microservicio Docker
@@ -40,14 +40,18 @@ Route::post('/test-facial', function (Request $request) {
             ->attach('img2', file_get_contents($request->file('foto_webcam')), 'web.jpg')
             ->post($url);
 
+        if ($response->failed()) {
+            return back()->withErrors(['Error de conexión: El microservicio no responde en ' . $url]);
+        }
+
         // 3. Devolución de resultados a la vista
-        // Decodificamos la respuesta de la IA a un array de PHP
         $respuestaIA = json_decode($response->body(), true);
 
-        // Se lo pasamos a la vista
         return view('test-facial', ['respuesta' => $respuestaIA]);
+    } catch (\Illuminate\Http\Client\ConnectionException $e) {
+        return back()->withErrors(['Error de red: No se pudo alcanzar el microservicio facial. ¿Está Docker corriendo en el puerto 8181?']);
     } catch (\Exception $e) {
-        return back()->withErrors(['Error de conexión con Docker: ' . $e->getMessage()]);
+        return back()->withErrors(['Error inesperado: ' . $e->getMessage()]);
     }
 });
 
