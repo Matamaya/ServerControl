@@ -46,9 +46,14 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </NavLink>
 
                                 {isGestor && (
-                                    <NavLink href={route('games.index')} active={route().current('games.*')}>
-                                        Gestión de Juegos
-                                    </NavLink>
+                                    <>
+                                        <NavLink href={route('games.index')} active={route().current('games.*')}>
+                                            Gestión de Juegos
+                                        </NavLink>
+                                        <NavLink href={route('sessions.latest')} active={route().current('sessions.*')}>
+                                            Última Sesión (Estadísticas)
+                                        </NavLink>
+                                    </>
                                 )}
 
                                 {isJugador && (
@@ -172,9 +177,14 @@ export default function AuthenticatedLayout({ header, children }) {
                         </ResponsiveNavLink>
                         
                         {isGestor && (
-                            <ResponsiveNavLink href={route('games.index')} active={route().current('games.*')}>
-                                Gestión de Juegos
-                            </ResponsiveNavLink>
+                            <>
+                                <ResponsiveNavLink href={route('games.index')} active={route().current('games.*')}>
+                                    Gestión de Juegos
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink href={route('sessions.latest')} active={route().current('sessions.*')}>
+                                    Última Sesión (Estadísticas)
+                                </ResponsiveNavLink>
+                            </>
                         )}
 
                         {isJugador && (

@@ -1,55 +1,128 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 
 export default function Chat({ auth, initialMessages }) {
     const [messages, setMessages] = useState(initialMessages || []);
+    const messagesEndRef = useRef(null);
+
     const { data, setData, post, reset, processing } = useForm({
         content: '',
     });
 
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Actualizar estado local cuando cambian las props (ej: por un reload o navegación)
+    useEffect(() => {
+        setMessages(initialMessages);
+    }, [initialMessages]);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
     useEffect(() => {
         // Escuchar el canal de Reverb
-        window.Echo.channel('chat.general')
-            .listen('MessageSend', (e) => {
-                setMessages((prev) => [...prev, e.message]);
-            });
+        if (window.Echo) {
+            window.Echo.channel('chat.general')
+                .listen('MessageSend', (e) => {
+                    setMessages((prev) => [...prev, e.message]);
+                });
+        }
 
-        return () => window.Echo.leave('chat.general');
+        // Fallback: Si Reverb falla o no está configurado, hacemos un polling suave cada 5 segundos
+        const interval = setInterval(() => {
+            router.reload({ only: ['initialMessages'] });
+        }, 5000);
+
+        return () => {
+            if (window.Echo) window.Echo.leave('chat.general');
+            clearInterval(interval);
+        };
     }, []);
 
     const submit = (e) => {
         e.preventDefault();
         post(route('messages.store'), {
-            onSuccess: () => reset('content'),
+            onSuccess: () => {
+                reset('content');
+            },
         });
     };
 
+    const clearChat = () => {
+        if (confirm('¿Estás seguro de que quieres borrar todos los mensajes?')) {
+            router.delete(route('messages.clear'));
+        }
+    };
+
+    const isAdmin = auth.user.roles.some(r => r.name === 'administrador');
+
     return (
-        <AuthenticatedLayout user={auth.user} header={<h2>Sala de Chat</h2>}>
+        <AuthenticatedLayout 
+            user={auth.user} 
+            header={
+                <div className="flex justify-between items-center">
+                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">Sala de Chat</h2>
+                    {isAdmin && (
+                        <button 
+                            onClick={clearChat}
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded text-sm transition"
+                        >
+                            Borrar Historial
+                        </button>
+                    )}
+                </div>
+            }
+        >
             <Head title="Chat" />
             <div className="py-12">
-                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8 bg-white p-6 rounded shadow">
-                    <div className="h-80 overflow-y-auto mb-4 p-4 border rounded space-y-2">
-                        {messages.map((msg, i) => (
-                            <div key={i} className="text-sm">
-                                <strong>{msg.user.name}:</strong> {msg.content}
-                            </div>
-                        ))}
+                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <div className="h-96 overflow-y-auto mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
+                            {messages.length === 0 && (
+                                <p className="text-gray-500 text-center py-10">No hay mensajes aún. ¡Sé el primero!</p>
+                            )}
+                            {messages.map((msg, i) => (
+                                <div key={i} className={`flex flex-col ${msg.user_id === auth.user.id ? 'items-end' : 'items-start'}`}>
+                                    <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                                        msg.user_id === auth.user.id 
+                                        ? 'bg-blue-600 text-white rounded-br-none' 
+                                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                                    }`}>
+                                        <div className="text-xs font-bold mb-1 opacity-75">
+                                            {msg.user.name}
+                                        </div>
+                                        <div className="text-sm">
+                                            {msg.content}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            <div ref={messagesEndRef} />
+                        </div>
+                        
+                        <form onSubmit={submit} className="flex gap-2">
+                            <input
+                                type="text"
+                                className="flex-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm"
+                                placeholder="Escribe un mensaje..."
+                                value={data.content}
+                                onChange={e => setData('content', e.target.value)}
+                                autoComplete="off"
+                            />
+                            <button 
+                                disabled={processing || !data.content.trim()} 
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition disabled:opacity-50"
+                            >
+                                Enviar
+                            </button>
+                        </form>
                     </div>
-                    <form onSubmit={submit} className="flex gap-2">
-                        <input
-                            type="text"
-                            className="flex-1 border-gray-300 rounded"
-                            value={data.content}
-                            onChange={e => setData('content', e.target.value)}
-                        />
-                        <button disabled={processing} className="bg-blue-600 text-white px-4 py-2 rounded">
-                            Enviar
-                        </button>
-                    </form>
                 </div>
             </div>
         </AuthenticatedLayout>
     );
-}
+}

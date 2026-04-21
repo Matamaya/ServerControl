@@ -41,4 +41,15 @@ class MessageController extends Controller
 
         return redirect()->back();
     }
+
+    public function destroyAll()
+    {
+        // Solo el administrador puede borrar todo
+        if (!Auth::user()->hasRole('administrador')) {
+            abort(403);
+        }
+
+        Message::truncate();
+        return redirect()->back();
+    }
 }
