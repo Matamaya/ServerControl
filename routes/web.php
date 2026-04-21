@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
     // Rutas del chat
     Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
     Route::post('/messages', [MessageController::class, 'store'])->name('messages.store');
+    Route::delete('/messages/clear', [MessageController::class, 'destroyAll'])->name('messages.clear');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -84,6 +85,12 @@ Route::middleware(['auth', 'role:administrador'])->group(function () {
 Route::middleware(['auth', 'role:gestor'])->group(function () {
     // Esto crea automáticamente las rutas /games, /games/create, etc.
     Route::resource('games', GameController::class);
+    
+    // Ruta para ver la ÚLTIMA sesión registrada (dinámica)
+    Route::get('/sessions/latest/stats', [\App\Http\Controllers\GameSessionController::class, 'latest'])->name('sessions.latest');
+
+    // Ruta para ver las estadísticas de una sesión específica
+    Route::get('/sessions/{session}/stats', [\App\Http\Controllers\GameSessionController::class, 'show'])->name('sessions.showStats');
 });
 
 // Rutas solo para JUGADORES

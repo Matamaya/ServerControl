@@ -13,34 +13,22 @@ Route::get('/ping', function () {
 
 // Rutas protegidas de la API (Solo para usuarios autenticados que estén jugando)
 Route::middleware('auth:sanctum')->group(function () {
-
-    // Aquí el juego enviará una petición POST cuando el jugador le dé a "Start"
-    Route::post('/games/{game}/start-session', function ($game) {
-        // En el futuro, aquí crearemos la sesión en la base de datos
-        // y devolveremos el ID de la sesión al juego.
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Sesión de juego iniciada correctamente para el juego ID: ' . $game,
-            'session_id' => uniqid() // Simulamos un ID de sesión por ahora
-        ]);
-    });
 });
 
-// El juego avisa de que empieza la partida
+
+// ¡CUIDADO! Estas rutas están FUERA del middleware auth:sanctum
 Route::post('/games/{game}/start-session', function (Request $request, $gameId) {
-    // Simulamos que el usuario es el ID 1 por ahora (en el futuro vendrá del token)
+    // Simulamos que el usuario es el ID 1 por ahora para poder probar
     $session = GameSession::create([
         'user_id' => 1,
         'game_id' => $gameId,
         'started_at' => Carbon::now(),
     ]);
-
     return response()->json([
         'status' => 'success',
         'session_id' => $session->id
     ]);
 });
-
 // El juego envía una emoción detectada en la webcam (por la librería de JS)
 Route::post('/sessions/{session}/emotions', function (Request $request, $sessionId) {
     $data = EmotionData::create([
