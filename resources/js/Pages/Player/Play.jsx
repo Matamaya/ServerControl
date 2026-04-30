@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 
-export default function Play({ auth, game }) {
+export default function Play({ auth, game, gameToken }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -25,7 +25,7 @@ export default function Play({ auth, game }) {
                         */}
                         {game.url_path ? (
                             <iframe
-                                src={game.url_path}
+                                src={`${game.url_path}${game.url_path.includes('?') ? '&' : '?'}gameId=${game.id}&apiBaseUrl=${window.location.origin}/api&token=${gameToken}`}
                                 className="w-full h-full border-0"
                                 title={`Juego ${game.title}`}
                                 allow="camera; microphone; fullscreen" // Permisos clave para el futuro reconocimiento facial/emociones
