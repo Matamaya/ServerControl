@@ -116,3 +116,32 @@ Para implementar el chat y las notificaciones en tiempo real, se ha utilizado **
 - php artisan reverb:start - Mantiene una conexión abierta con los navegadores. Recibe los eventos de Laravel y los "difunde" (broadcast) instantáneamente a los usuarios conectados a la sala de chat.* --- Esta fallando al descargarse
 
 - php artisan queue:work - Procesa las tareas en segundo plano, como el envío de mensajes en tiempo real.
+
+
+## Integración de Asistencia Inteligente (MCP) y Capa de Eventos (RabbitMQ)
+
+Este proyecto no se limita a ser una aplicación monolítica tradicional, sino que incorpora una arquitectura propia de entornos de producción reales mediante la integración del protocolo MCP (Model Context Protocol) y RabbitMQ.
+
+### Arquitectura del Sistema
+El flujo de trabajo desacoplado sigue la siguiente estructura:
+`GitHub -> GitHub MCP -> Asistente IA -> Laravel -> RabbitMQ -> Workers`
+
+### Capa de Asistencia Inteligente (MCP)
+
+Se ha añadido una capa de asistencia inteligente encima de este flujo de trabajo, no para reemplazar las automatizaciones básicas, sino para reforzarlas.
+
+*   **Herramienta:** Servidor oficial `github/github-mcp-server` ejecutado mediante Docker.
+*   **Seguridad:** Se ha configurado mediante un Personal Access Token con permisos estrictamente limitados a `repos`, `issues` y `pull_requests`. No se ha dado acceso a acciones destructivas.
+*   **Cliente IA:** El servidor MCP es consumido por un asistente de IA (Gemini) que nos permite gestionar issues, revisar código y analizar el estado del proyecto directamente desde el IDE o la terminal.
+
+### Capa de Eventos Asíncronos (RabbitMQ)
+Para evitar que Laravel asuma toda la carga de forma síncrona, hemos implementado RabbitMQ. 
+*   **Propósito:** GitHub centraliza el código, pero RabbitMQ se encarga de distribuir eventos relevantes del sistema de forma desacoplada (por ejemplo: la apertura de una PR, la publicación de un juego o la finalización de una validación).
+*   **Integración IA:** Utilizamos el servidor `amazon-mq/mcp-server-rabbitmq` (ejecutado con `uvx`) para exponer las operaciones del broker a la IA. Esto permite que el asistente pueda listar colas, comprobar exchanges y verificar si los eventos se están encolando correctamente.
+
+
+Comandos utilizados:
+
+- docker run -d -p 5672:5672 -p 15672:15672 --name rabbitmq rabbitmq:3-management - Contenedor de RabbitMQ
+- npx add-mcp "docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN=Token ghcr.io/github/github-mcp-server" - Conexión MCP con GitHub
+- npx add-mcp "uvx amq-mcp-server-rabbitmq@latest --allow-mutative-tools" - Conexión MCP con Gemini
