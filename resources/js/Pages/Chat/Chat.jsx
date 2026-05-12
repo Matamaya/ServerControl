@@ -14,7 +14,6 @@ export default function Chat({ auth, initialMessages }) {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Actualizar estado local cuando cambian las props (ej: por un reload o navegación)
     useEffect(() => {
         setMessages(initialMessages);
     }, [initialMessages]);
@@ -24,7 +23,6 @@ export default function Chat({ auth, initialMessages }) {
     }, [messages]);
 
     useEffect(() => {
-        // Escuchar el canal de Reverb
         if (window.Echo) {
             window.Echo.channel('chat.general')
                 .listen('MessageSend', (e) => {
@@ -32,7 +30,6 @@ export default function Chat({ auth, initialMessages }) {
                 });
         }
 
-        // Fallback: Si Reverb falla o no está configurado, hacemos un polling suave cada 5 segundos
         const interval = setInterval(() => {
             router.reload({ only: ['initialMessages'] });
         }, 5000);
@@ -65,11 +62,11 @@ export default function Chat({ auth, initialMessages }) {
             user={auth.user} 
             header={
                 <div className="flex justify-between items-center">
-                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">Sala de Chat</h2>
+                    <h2 className="font-semibold text-xl text-slate-100 leading-tight">Sala de Chat</h2>
                     {isAdmin && (
                         <button 
                             onClick={clearChat}
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded text-sm transition"
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-1 rounded text-sm font-semibold transition"
                         >
                             Borrar Historial
                         </button>
@@ -78,22 +75,22 @@ export default function Chat({ auth, initialMessages }) {
             }
         >
             <Head title="Chat" />
-            <div className="py-12">
+            <div className="py-6">
                 <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <div className="h-96 overflow-y-auto mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
+                    <div className="bg-slate-900/50 backdrop-blur-md overflow-hidden shadow-sm sm:rounded-lg p-6 border border-slate-800">
+                        <div className="h-96 overflow-y-auto mb-4 p-4 border border-slate-800 rounded-lg bg-slate-950/50 space-y-3">
                             {messages.length === 0 && (
-                                <p className="text-gray-500 text-center py-10">No hay mensajes aún. ¡Sé el primero!</p>
+                                <p className="text-slate-400 text-center py-10">No hay mensajes aún. ¡Sé el primero!</p>
                             )}
                             {messages.map((msg, i) => (
                                 <div key={i} className={`flex flex-col ${msg.user_id === auth.user.id ? 'items-end' : 'items-start'}`}>
-                                    <div className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                                    <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                                         msg.user_id === auth.user.id 
                                         ? 'bg-blue-600 text-white rounded-br-none' 
-                                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                                        : 'bg-slate-800 text-slate-100 rounded-bl-none'
                                     }`}>
                                         <div className="text-xs font-bold mb-1 opacity-75">
-                                            {msg.user.name}
+                                            {msg.user_id === auth.user.id ? 'Tú' : msg.user.name}
                                         </div>
                                         <div className="text-sm">
                                             {msg.content}
@@ -107,7 +104,7 @@ export default function Chat({ auth, initialMessages }) {
                         <form onSubmit={submit} className="flex gap-2">
                             <input
                                 type="text"
-                                className="flex-1 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm"
+                                className="flex-1 bg-slate-800 text-white border-slate-700 focus:border-sky-500 focus:ring-sky-500 rounded-lg shadow-sm"
                                 placeholder="Escribe un mensaje..."
                                 value={data.content}
                                 onChange={e => setData('content', e.target.value)}
@@ -115,7 +112,7 @@ export default function Chat({ auth, initialMessages }) {
                             />
                             <button 
                                 disabled={processing || !data.content.trim()} 
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition disabled:opacity-50"
+                                className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2 rounded-lg font-medium transition disabled:opacity-50"
                             >
                                 Enviar
                             </button>
@@ -125,4 +122,4 @@ export default function Chat({ auth, initialMessages }) {
             </div>
         </AuthenticatedLayout>
     );
-}
+}

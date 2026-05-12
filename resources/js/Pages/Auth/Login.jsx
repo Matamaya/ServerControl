@@ -74,14 +74,14 @@ export default function Login({ status, canResetPassword }) {
         const video = videoRef.current;
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
-        
+
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         canvas.toBlob((blob) => {
             const file = new File([blob], "foto_capturada.jpg", { type: "image/jpeg" });
-            
+
             const formData = new FormData();
             formData.append('email', data.email);
             formData.append('foto_webcam', file);
@@ -169,29 +169,29 @@ export default function Login({ status, canResetPassword }) {
                                     </span>
                                 </label>
                             </div>
-                            
+
                             <button
                                 type="button"
                                 onClick={iniciarCamara}
-                                className="text-sm text-indigo-600 hover:text-indigo-900 underline text-left mt-1"
+                                className="text-sm text-sky-300 hover:text-blue-100 underline text-left mt-1"
                             >
                                 Usar reconocimiento facial
                             </button>
                         </div>
 
-                        <div className="mt-4 flex items-center justify-end">
+                        <div className="mt-6 flex flex-col items-center space-y-4">
+                            <PrimaryButton className="w-full justify-center hover:bg-blue-500" disabled={processing}>
+                                Log in
+                            </PrimaryButton>
+
                             {canResetPassword && (
                                 <Link
                                     href={route('password.request')}
-                                    className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    className="rounded-md text-sm text-sky-300 underline hover:text-blue-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 >
                                     Forgot your password?
                                 </Link>
                             )}
-
-                            <PrimaryButton className="ms-4" disabled={processing}>
-                                Log in
-                            </PrimaryButton>
                         </div>
                     </>
                 )}
@@ -200,23 +200,22 @@ export default function Login({ status, canResetPassword }) {
             {isFacialLogin && (
                 <div className="mt-4 flex flex-col items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <p className="text-sm text-gray-600 text-center font-medium">Mira a la cámara para iniciar sesión</p>
-                    
+
                     <div className="relative rounded-lg overflow-hidden border border-gray-300 w-full max-w-[320px] aspect-video bg-black shadow-inner">
-                        <video 
-                            ref={videoRef} 
-                            autoPlay 
-                            playsInline 
+                        <video
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
                             className="w-full h-full object-cover transform -scale-x-100"
                         ></video>
                         <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
                     </div>
 
                     {facialMessage.text && (
-                        <div className={`w-full p-3 rounded-md text-sm font-medium text-center ${
-                            facialMessage.type === 'error' ? 'bg-red-100 text-red-700 border border-red-200' :
+                        <div className={`w-full p-3 rounded-md text-sm font-medium text-center ${facialMessage.type === 'error' ? 'bg-red-100 text-red-700 border border-red-200' :
                             facialMessage.type === 'success' ? 'bg-green-100 text-green-700 border border-green-200' :
-                            'bg-blue-100 text-blue-700 border border-blue-200'
-                        }`}>
+                                'bg-blue-100 text-blue-700 border border-blue-200'
+                            }`}>
                             {facialMessage.text}
                         </div>
                     )}
@@ -233,9 +232,8 @@ export default function Login({ status, canResetPassword }) {
                         <button
                             type="button"
                             onClick={submitFacial}
-                            className={`flex-1 px-4 py-2 ${
-                                facialProcessing || facialMessage.type === 'success' ? 'bg-indigo-400' : 'bg-indigo-600'
-                            } text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition flex justify-center items-center shadow-sm`}
+                            className={`flex-1 px-4 py-2 ${facialProcessing || facialMessage.type === 'success' ? 'bg-indigo-400' : 'bg-indigo-600'
+                                } text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition flex justify-center items-center shadow-sm`}
                             disabled={facialProcessing || facialMessage.type === 'success'}
                         >
                             {facialProcessing ? 'Verificando...' : '📸 Entrar'}
